@@ -28,3 +28,8 @@
   επιστρέφει το wikidata,
   - random για την παρουσίαση τυχαίου έργου από την βάση
   δεδομένων.
+
+**Για εγκατάσταση των εξωτερικών βιβλιοθηκών:**
+```pip install -r requirements.txt```
+ή
+```pip3 install -r requirements.txt```
