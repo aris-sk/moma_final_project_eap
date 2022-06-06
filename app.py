@@ -1224,6 +1224,14 @@ class MomaGuiApp:
         def artwork_show(event=None):
             for widget in self.artwork_tab_frame.winfo_children():
                 widget.pack_forget()
+
+            self.artwork_tab_frame.update()
+            image_size = (
+                self.artwork_tab_frame.winfo_width() * 0.9,
+                self.artwork_tab_frame.winfo_height() * 0.9,
+            )
+
+
             self.show_artwork_image(self.artwork_tab_frame, image_size)
             self.back_frame = tk.Frame(
                 self.artwork_tab_frame,
@@ -1294,11 +1302,6 @@ class MomaGuiApp:
                 self.artwork_detail.pack(expand=1, fill="x", **self.pads)
                 self.artwork_detail_info.pack(expand=1, fill="x", **self.pads)
 
-        self.artwork_tab_frame.update()
-        image_size = (
-            self.artwork_tab_frame.winfo_width() * 0.9,
-            self.artwork_tab_frame.winfo_height() * 0.9,
-        )
 
         self.image_button_frame.pack(expand=0, side="bottom", **self.pads)
         self.image_button.pack(expand=1, side="left", **self.pads)
@@ -1321,6 +1324,13 @@ class MomaGuiApp:
         def artist_show():
             for widget in self.artist_tab_frame.winfo_children():
                 widget.pack_forget()
+
+            self.artist_tab_frame.update()
+            image_size = (
+                self.artist_tab_frame.winfo_width() * 0.9,
+                self.artist_tab_frame.winfo_height() * 0.9,
+            )
+
             self.show_artist_image(self.ar.wikiqid, image_size)
             self.artist_back_frame = tk.Frame(
                 self.artist_tab_frame,
@@ -1488,11 +1498,6 @@ class MomaGuiApp:
 
         self.root.bind("<q>", self.hide_artist_tab)
 
-        self.artist_tab_frame.update()
-        image_size = (
-            self.artist_tab_frame.winfo_width() * 0.9,
-            self.artist_tab_frame.winfo_height() * 0.9,
-        )
 
         self.artist_image_button_frame.pack(expand=0, side="bottom", **self.pads)
         self.artist_image_button.pack(expand=1, side="left", **self.pads)
