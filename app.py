@@ -14,6 +14,7 @@ import hashlib
 import urllib.request
 import io
 from random import choice
+import time
 
 import database_functions
 from artworks import Artworks
@@ -74,7 +75,6 @@ class MomaGuiApp:
         }
         ## Φόρτωση της βάσης δεδομένων σε dataframe
         self.full_df = database_functions.search_database()
-        # self.artworks_table_columns = database_functions.get_table_columns("artworks")
         self.selected_object_id = None
         self.last_focused = None
         self.widgets()
@@ -406,6 +406,8 @@ class MomaGuiApp:
     def draw_table(self, df):
         """Μέθοδος για την δημιουργία και σχεδίαση του πίνακα"""
 
+        self.total_df = df
+
         def open_stats_frame():
             """Συνάρτηση για εναλλαγή μεταξύ πίνακα και των στατιστικών charts"""
 
@@ -518,7 +520,7 @@ class MomaGuiApp:
         ## Εμφάνιση του πλήθους αποτελεσμάτων της αναζήτησης σε label
         self.results_number = tk.Label(
             self.open_stats_button_frame,
-            text=f"ΠΛΗΘΟΣ ΕΡΓΩΝ: {df.shape[0]}",
+            text=f"ΠΛΗΘΟΣ ΕΡΓΩΝ: {self.total_df.shape[0]}",
             **self.label_options,
         )
         self.results_number.config(font=f"{self.font} 10 bold")
@@ -592,15 +594,8 @@ class MomaGuiApp:
             self.artist_info = database_functions.get_artist_info_by_constituentid(
                 self.aw.constituentid
             )
-            # print(self.artist_info)
-            self.ar = Artists(*self.artist_info)
 
-            # print("\n------artwork--------")
-            # for k, v in vars(self.aw).items():
-            # print(f"{k} ->  {v}")
-            # print("\n------artist--------")
-            # for k, v in vars(self.ar).items():
-            # print(f"{k} ->  {v}")
+            self.ar = Artists(*self.artist_info)
 
             msg = f"\n\nΤίτλος\n{self.aw.title}\n\n\nΚαλλιτέχνης\n{self.aw.artist}"
 
@@ -633,12 +628,6 @@ class MomaGuiApp:
                 command=None,
                 **self.button_options,
             )
-
-            # self.return_button_frame = tk.Frame(
-            # self.artwork_tab_info_label,
-            # bg="#404040",
-            # width=50,
-            # )
 
             self.return_button = tk.Button(
                 self.image_button_frame,
@@ -676,12 +665,6 @@ class MomaGuiApp:
                 command=None,
                 **self.button_options,
             )
-
-            # self.artist_return_button_frame = tk.Frame(
-            # self.artist_tab_info_label,
-            # bg="#404040",
-            # width=50,
-            # )
 
             self.artist_return_button = tk.Button(
                 self.artist_image_button_frame,
@@ -1040,22 +1023,52 @@ class MomaGuiApp:
 
     def delete(self):
         """Μέθοδος που διαγράφει το επιλεγμένο έργο και ξαναφορτώνει τα υπόλοιπα έργα"""
-        self.full_df = database_functions.delete_from_artworks(self.selected_object_id)
-        self.close_form()
-        self.hide_selected()
+        
+        try:
+            self.full_df = database_functions.delete_from_artworks(self.selected_object_id)
+            self.close_form()
+            self.hide_selected()
+            self.delete_msg = "Επιτυχής διαγραφή του επιλεγμένου έργου"
+            
+            self.clear_center_frame()
+            self.open_stats_button_frame.destroy()
+            self.stats_frame.destroy()
+            self.show_results_frame.destroy()
+            self.draw_table(self.full_df)
 
-        self.clear_center_frame()
-        self.open_stats_button_frame.destroy()
-        self.stats_frame.destroy()
-        self.show_results_frame.destroy()
-        self.draw_table(self.full_df)
+            self.table.bind("<ButtonRelease-1>", self.select_table_row)
+            self.bind_arrow_keys(self.table, self.select_table_row)
+            self.table.bind("<Return>", self.create_artwork_tab)
+            self.open_artwork_tab.config(state="normal")
+            self.table.unbind("<q>")
+            self.select_first_table_row()
+            self.results_number.config(text=self.delete_msg)
+            self.results_number.update()
+            time.sleep(2)
+            self.results_number.config(text=f"ΠΛΗΘΟΣ ΕΡΓΩΝ: {self.total_df.shape[0]}")
+            self.results_number.update()
+            
+        except Exception as e:
+            self.delete_msg = "Πρόβλημα κατά τη διαγραφή του επιλεγμένου έργου"
+            
+            self.clear_center_frame()
+            self.open_stats_button_frame.destroy()
+            self.stats_frame.destroy()
+            self.show_results_frame.destroy()
+            self.draw_table(self.full_df)
 
-        self.table.bind("<ButtonRelease-1>", self.select_table_row)
-        self.bind_arrow_keys(self.table, self.select_table_row)
-        self.table.bind("<Return>", self.create_artwork_tab)
-        self.open_artwork_tab.config(state="normal")
-        self.table.unbind("<q>")
-        self.select_first_table_row()
+            self.table.bind("<ButtonRelease-1>", self.select_table_row)
+            self.bind_arrow_keys(self.table, self.select_table_row)
+            self.table.bind("<Return>", self.create_artwork_tab)
+            self.open_artwork_tab.config(state="normal")
+            self.table.unbind("<q>")
+            self.select_first_table_row()
+            self.results_number.config(text=self.delete_msg)
+            self.results_number.update()
+            time.sleep(3)
+            self.results_number.config(text=f"ΠΛΗΘΟΣ ΕΡΓΩΝ: {self.total_df.shape[0]}")
+            self.results_number.update()
+
 
     def show_artwork_image(self, where, size=None):
         """Μέθοδος που προβάλει την εικόνα του έργου"""
@@ -1250,7 +1263,6 @@ class MomaGuiApp:
         self.open_artwork_tab.config(state="disabled", disabledforeground="#f4bf75")
         self.open_artist_tab.config(state="normal")
 
-        # self.hide_selected() δεν εχω αποφασισει ακομα αν θα κρυβω ή οχι το thumb οταν ανοιγει καρτελα
         self.artwork_tab_frame.config(bg="#303030")
 
         self.artwork_tab_frame.config(font=f"{self.font} 25 bold", fg="#87af5f")
@@ -1381,7 +1393,6 @@ class MomaGuiApp:
         self.open_artwork_tab.config(state="normal")
         self.open_artist_tab.config(state="disabled")
 
-        # self.hide_selected() δεν εχω αποφασισει ακομα αν θα κρυβω ή οχι το thumb οταν ανοιγει καρτελα
         self.artist_tab_frame.config(bg="#303030")
         self.artist_tab_frame.config(font=f"{self.font} 25 bold", fg="#87af5f")
         self.artist_tab_frame.pack(expand=1, fill="both", **self.pads)
@@ -1476,7 +1487,6 @@ class MomaGuiApp:
             selected_row = Artworks(*aw_info)
             self.available_artworks_names.insert(
                 "end",
-                # f"[{selected_row.objectid}]  {selected_row.title}  ({selected_row.date.strip('(').strip(')')})",
                 f"[{selected_row.objectid}]  {selected_row.title},  {selected_row.date}",
             )
 
