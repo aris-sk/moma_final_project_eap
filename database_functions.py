@@ -3,7 +3,8 @@
 import pandas as pd
 import sqlite3
 from sqlite3 import Error
-import os
+from wget import download
+import os, time
 
 
 def load_database():
@@ -11,7 +12,18 @@ def load_database():
 
     if not os.path.exists("mydatabase.db") or os.path.getsize("mydatabase.db") == 0:
         try:
-            ## Φόρτωση των csv αρχείων σε dataframes
+            ## Κατέβασμα των αρχείων csv με τα δεδομένα από το github
+            location = "files"
+            download("https://media.githubusercontent.com/media/MuseumofModernArt/collection/master/Artists.csv", location)
+            download("https://media.githubusercontent.com/media/MuseumofModernArt/collection/master/Artworks.csv", location)
+
+            ## Αναμονή για ολοκλήρωση των λήψεων
+            while not os.path.exists("files/Artists.csv"):
+                time.sleep(1)
+            while not os.path.exists("files/Artworks.csv"):
+                time.sleep(1)
+
+            ## Φόρτωση των csv αρχείων σε dataframes       
             df_artists = pd.read_csv("files/Artists.csv")
             df_artworks = pd.read_csv("files/Artworks.csv")
 
