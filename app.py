@@ -1016,6 +1016,7 @@ class MomaGuiApp:
         self.e1.focus()
 
     def show_selected(self):
+        """Μέθοδος που εμφανίζει στο sidebar το επιλεγμένο έργο"""
 
         self.clear_fields()
         for i in self.sidebar_lower_frame.winfo_children():
@@ -1038,6 +1039,7 @@ class MomaGuiApp:
             i.pack_forget()
 
     def delete(self):
+        """Μέθοδος που διαγράφει το επιλεγμένο έργο και ξαναφορτώνει τα υπόλοιπα έργα"""
         self.full_df = database_functions.delete_from_artworks(self.selected_object_id)
         self.close_form()
         self.hide_selected()
@@ -1056,6 +1058,7 @@ class MomaGuiApp:
         self.select_first_table_row()
 
     def show_artwork_image(self, where, size=None):
+        """Μέθοδος που προβάλει την εικόνα του έργου"""
 
         if self.selected_object_id:
             image_url = database_functions.get_artwork_image(self.selected_object_id)
@@ -1135,11 +1138,8 @@ class MomaGuiApp:
             self.abstract = sparql.query().convert()["results"]["bindings"][0]["label"][
                 "value"
             ]
-            # self.thumb_url = sparql.query().convert()['results']['bindings'][0]['thumbnail']['value']
-            # print(abstract)
-            # print(thumb_url)
         except Exception as e:
-            # print(e)
+            print(e)
             return None
 
         return self.abstract
@@ -1156,11 +1156,6 @@ class MomaGuiApp:
                     "P18"
                 ][0]["mainsnak"]["datavalue"]["value"]
                 artist_image_name = artist_image_name.replace(" ", "_")
-
-                ## Με χρήση της βιβλιοθήκης sparqlwrapper για queries στην βάση DBpedia,
-                ## η οποία επιστρέφει δομημένο περιεχόμενο απο τις πληροφορίες του wikipedia
-                # image_url = self.get_data_from_dbpedia(self.ar.displayname)[1]
-                # print(image_url)
 
                 ## Σχηματισμός του url της εικόνας του καλλιτέχνη
                 ## Αναφορά από https://stackoverflow.com/questions/34393884/how-to-get-image-url-property-from-wikidata-item-by-api
